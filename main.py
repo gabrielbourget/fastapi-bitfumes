@@ -28,9 +28,9 @@ async def get_blog(blog_id: int):
   return { "id": blog_id }
 
 @app.get("/blogs/{blog_id}/comments")
-async def get_blog_comments(blog_id: int):
+async def get_blog_comments(blog_id: int, limit = 10):
   """get blog comments endpoint"""
-  return { "comments": ["comment 1", "comment 2", "comment 3"], "id": blog_id }
+  return { "comments": ["comment 1", "comment 2", "comment 3"], "id": blog_id, "limit": limit }
 
 
 @app.get("/about")
