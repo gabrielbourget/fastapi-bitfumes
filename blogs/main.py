@@ -17,28 +17,6 @@ def get_db():
   finally:
     db.close()
 
-@app.post("/blogs", status_code = status.HTTP_201_CREATED)
-async def create_blog(blog: schemas.Blog, db: Session = Depends(get_db)):
-  """create blog endpoint"""
-
-  try:
-    # new_blog_post = models.Blog(**blog.dict())
-    new_blog_post = models.Blog(title = blog.title, body = blog.body)
-    db.add(new_blog_post)
-    db.commit()
-    db.refresh(new_blog_post)
-  except IntegrityError as e:
-    db.rollback()
-    raise HTTPException(status_code=400, detail="Blog post already exists") from e
-  except DatabaseError as e:
-    db.rollback()
-    raise HTTPException(status_code=500, detail="Database error") from e
-  except Exception as e:
-    db.rollback()
-    raise HTTPException(status_code=500, detail="Internal server error") from e
-
-  return { "data": new_blog_post }
-
 @app.get("/blogs")
 async def get_blogs(db: Session = Depends(get_db)):
   """get blog endpoint"""
@@ -69,3 +47,44 @@ async def get_blog(blog_id: int, db: Session = Depends(get_db)):
     raise HTTPException(status_code=500, detail="Database error") from e
   except Exception as e:
     raise HTTPException(status_code=500, detail="Internal server error") from e
+
+@app.post("/blogs", status_code = status.HTTP_201_CREATED)
+async def create_blog(blog: schemas.Blog, db: Session = Depends(get_db)):
+  """create blog endpoint"""
+
+  try:
+    # new_blog_post = models.Blog(**blog.dict())
+    new_blog_post = models.Blog(title = blog.title, body = blog.body)
+    db.add(new_blog_post)
+    db.commit()
+    db.refresh(new_blog_post)
+  except IntegrityError as e:
+    db.rollback()
+    raise HTTPException(status_code=400, detail="Blog post already exists") from e
+  except DatabaseError as e:
+    db.rollback()
+    raise HTTPException(status_code=500, detail="Database error") from e
+  except Exception as e:
+    db.rollback()
+    raise HTTPException(status_code=500, detail="Internal server error") from e
+
+  return { "data": new_blog_post }
+
+@app.delete("/blogs/{blog_id}", status_code = status.HTTP_204_NO_CONTENT)
+async def delete_blog(blog_id: int, db: Session = Depends(get_db)):
+  """delete blog endpoint"""
+  try:
+    (
+      db.query(models.Blog)
+        .filter(models.Blog.id == blog_id)
+        .delete(synchronize_session = False)
+    )
+    db.commit()
+
+    return { "data": "Blog post deleted" }
+  except DatabaseError as e:
+    db.rollback()
+    raise HTTPException(status_code = 500, detail="Database error") from e
+  except Exception as e:
+    db.rollback()
+    raise HTTPException(status_code = 500, detail="Internal server error") from e
