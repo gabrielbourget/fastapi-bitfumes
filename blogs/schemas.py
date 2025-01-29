@@ -7,3 +7,8 @@ class Blog(BaseModel):
   title: str
   body: str
   published: Optional[bool]
+
+class BlogResponse(Blog):
+  """blog response schema"""
+  class Config:
+    orm_mode = True

@@ -1,4 +1,5 @@
 """main app file in blogs module"""
+from typing import List
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError, DatabaseError
@@ -17,18 +18,20 @@ def get_db():
   finally:
     db.close()
 
-@app.get("/blogs")
+# @app.get("/blogs")
+@app.get("/blogs", response_model = List[schemas.BlogResponse])
 async def get_blogs(db: Session = Depends(get_db)):
   """get blog endpoint"""
   try:
     blog_posts = db.query(models.Blog).all()
-    return { "data": blog_posts }
+    return blog_posts
   except DatabaseError as e:
     raise HTTPException(status_code = 500, detail = "Database error") from e
   except Exception as e:
+    print(e)
     raise HTTPException(status_code = 500, detail = "Internal server error") from e
 
-@app.get("/blogs/{blog_id}", status_code = 200)
+@app.get("/blogs/{blog_id}", status_code = 200, response_model = schemas.BlogResponse)
 async def get_blog(blog_id: int, db: Session = Depends(get_db)):
   """get blog endpoint"""
   try:
@@ -42,7 +45,7 @@ async def get_blog(blog_id: int, db: Session = Depends(get_db)):
       # response.status_code = status.HTTP_404_NOT_FOUND
       # return { "error": f"Blog post with id {blog_id} not found" }
 
-    return { "data": blog_post }
+    return blog_post
   except DatabaseError as e:
     raise HTTPException(status_code=500, detail="Database error") from e
   except Exception as e:
