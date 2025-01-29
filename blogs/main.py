@@ -70,15 +70,47 @@ async def create_blog(blog: schemas.Blog, db: Session = Depends(get_db)):
 
   return { "data": new_blog_post }
 
+@app.put("/blogs/{blog_id}", status_code = status.HTTP_202_ACCEPTED)
+async def update_blog(blog_id: int, blog: schemas.Blog, db: Session = Depends(get_db)):
+  """update blog endpoint"""
+  try:
+    existing_blog_post = db.query(models.Blog).filter(models.Blog.id == blog_id).first()
+
+    if not existing_blog_post:
+      raise HTTPException(
+        status_code = status.HTTP_404_NOT_FOUND,
+        detail = f"Blog post with id {blog_id} not found"
+      )
+
+    (db.query(models.Blog)
+      .filter(models.Blog.id == blog_id)
+      .update(blog.dict(), synchronize_session = False)
+    )
+    db.commit()
+
+    return { "data": "Blog post updated" }
+  except DatabaseError as e:
+    db.rollback()
+    raise HTTPException(status_code = 500, detail="Database error") from e
+  except Exception as e:
+    db.rollback()
+    print(e)
+    raise HTTPException(status_code = 500, detail="Internal server error") from e
+
 @app.delete("/blogs/{blog_id}", status_code = status.HTTP_204_NO_CONTENT)
 async def delete_blog(blog_id: int, db: Session = Depends(get_db)):
   """delete blog endpoint"""
+
   try:
-    (
-      db.query(models.Blog)
-        .filter(models.Blog.id == blog_id)
-        .delete(synchronize_session = False)
-    )
+    existing_blog_post = db.query(models.Blog).filter(models.Blog.id == blog_id).first()
+
+    if not existing_blog_post:
+      raise HTTPException(
+        status_code = status.HTTP_404_NOT_FOUND,
+        detail = f"Blog post with id {blog_id} not found"
+      )
+
+    db.query(models.Blog).filter(models.Blog.id == blog_id).delete(synchronize_session = False)
     db.commit()
 
     return { "data": "Blog post deleted" }
