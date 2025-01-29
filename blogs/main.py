@@ -39,3 +39,8 @@ async def create_blog(blog: schemas.Blog, db: Session = Depends(get_db)):
 
   return { "data": new_blog_post }
 
+@app.get("/blogs")
+async def get_blogs(db: Session = Depends(get_db)):
+  """get blog endpoint"""
+  blog_posts = db.query(models.Blog).all()
+  return { "data": blog_posts }
