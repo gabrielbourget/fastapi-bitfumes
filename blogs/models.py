@@ -1,7 +1,9 @@
 """"Blog model file"""
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
+
 from blogs.database import Base
+
 
 class Blog(Base):
   """blog model"""

@@ -1,7 +1,8 @@
 """Solution for the Summarize exercise."""
-import os
 import csv
+import os
 from pathlib import Path
+
 import solution
 
 # DATA = Path(__file__).parent / "data" / "customers-1000.csv"

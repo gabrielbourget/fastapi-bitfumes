@@ -1,7 +1,9 @@
 """main app file"""
 from typing import Optional
+
 from fastapi import FastAPI
 from pydantic import BaseModel
+
 # import uvicorn
 
 class Blog(BaseModel):

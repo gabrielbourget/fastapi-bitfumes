@@ -1,0 +1,23 @@
+[tool.ruff]
+# Target Python version
+target-version = "py311"
+
+# Enable specific rule categories (default: Flake8 equivalent)
+select = ["E", "F", "B", "I"]
+
+# Ignore specific rules
+ignore = ["E101", "E501"]
+
+# Set max line length
+line-length = 100
+
+# Exclude certain directories
+exclude = [
+    ".git",
+    "__pycache__",
+    "venv",
+    "migrations"
+]
+
+# Enable automatic fixing
+fix = true
