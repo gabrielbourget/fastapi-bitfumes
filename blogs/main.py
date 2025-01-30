@@ -3,8 +3,7 @@ from typing import List
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError, DatabaseError
-from . import schemas, models
-from . import database
+from . import schemas, models, database, hashing
 
 app = FastAPI()
 
@@ -127,8 +126,14 @@ async def delete_blog(blog_id: int, db: Session = Depends(get_db)):
 @app.post("/users", status_code = status.HTTP_201_CREATED)
 async def create_user(user: schemas.User, db: Session = Depends(get_db)):
   """create user endpoint"""
+  hasher = hashing.Hash()
+
   try:
-    new_user = models.User(name = user.name, email = user.email, password = user.password)
+    new_user = models.User(
+      name = user.name,
+      email = user.email,
+      password = hasher.bcrypt(password = user.password)
+    )
 
     db.add(new_user)
     db.commit()
@@ -143,4 +148,5 @@ async def create_user(user: schemas.User, db: Session = Depends(get_db)):
     raise HTTPException(status_code = 500, detail = "Database error") from e
   except Exception as e:
     db.rollback()
+    print(e)
     raise HTTPException(status_code = 500, detail = "Internal server error") from e
