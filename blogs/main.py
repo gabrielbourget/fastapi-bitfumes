@@ -18,7 +18,7 @@ def get_db():
     db.close()
 
 # @app.get("/blogs")
-@app.get("/blogs", response_model = List[schemas.BlogResponse])
+@app.get("/blogs", response_model = List[schemas.BlogResponse], tags=["blogs"])
 async def get_blogs(db: Session = Depends(get_db)):
   """get blog endpoint"""
   try:
@@ -30,7 +30,12 @@ async def get_blogs(db: Session = Depends(get_db)):
     print(e)
     raise HTTPException(status_code = 500, detail = "Internal server error") from e
 
-@app.get("/blogs/{blog_id}", status_code = 200, response_model = schemas.BlogResponse)
+@app.get(
+  "/blogs/{blog_id}",
+  status_code = 200,
+  response_model = schemas.BlogResponse,
+  tags=["blogs"]
+)
 async def get_blog(blog_id: int, db: Session = Depends(get_db)):
   """get blog endpoint"""
   try:
@@ -50,7 +55,7 @@ async def get_blog(blog_id: int, db: Session = Depends(get_db)):
   except Exception as e:
     raise HTTPException(status_code=500, detail="Internal server error") from e
 
-@app.post("/blogs", status_code = status.HTTP_201_CREATED)
+@app.post("/blogs", status_code = status.HTTP_201_CREATED, tags=["blogs"])
 async def create_blog(blog: schemas.Blog, db: Session = Depends(get_db)):
   """create blog endpoint"""
 
@@ -72,7 +77,7 @@ async def create_blog(blog: schemas.Blog, db: Session = Depends(get_db)):
 
   return { "data": new_blog_post }
 
-@app.put("/blogs/{blog_id}", status_code = status.HTTP_202_ACCEPTED)
+@app.put("/blogs/{blog_id}", status_code = status.HTTP_202_ACCEPTED, tags=["blogs"])
 async def update_blog(blog_id: int, blog: schemas.Blog, db: Session = Depends(get_db)):
   """update blog endpoint"""
   try:
@@ -99,7 +104,7 @@ async def update_blog(blog_id: int, blog: schemas.Blog, db: Session = Depends(ge
     print(e)
     raise HTTPException(status_code = 500, detail="Internal server error") from e
 
-@app.delete("/blogs/{blog_id}", status_code = status.HTTP_204_NO_CONTENT)
+@app.delete("/blogs/{blog_id}", status_code = status.HTTP_204_NO_CONTENT, tags=["blogs"])
 async def delete_blog(blog_id: int, db: Session = Depends(get_db)):
   """delete blog endpoint"""
 
@@ -123,7 +128,30 @@ async def delete_blog(blog_id: int, db: Session = Depends(get_db)):
     db.rollback()
     raise HTTPException(status_code = 500, detail="Internal server error") from e
 
-@app.post("/users", status_code = status.HTTP_201_CREATED)
+@app.get("/users/{user_id}", response_model = schemas.ReadUser, tags=["users"])
+async def get_user(user_id: int, db: Session = Depends(get_db)):
+  """get user endpoint"""
+  try:
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+
+    if not user:
+      raise HTTPException(
+        status_code = status.HTTP_404_NOT_FOUND,
+        detail = f"User with id {user_id} not found"
+      )
+
+    return user
+  except DatabaseError as e:
+    raise HTTPException(status_code = 500, detail = "Database error") from e
+  except Exception as e:
+    raise HTTPException(status_code = 500, detail = "Internal server error") from e
+
+@app.post(
+  "/users",
+  status_code = status.HTTP_201_CREATED,
+  response_model = schemas.ReadUser,
+  tags=["users"]
+)
 async def create_user(user: schemas.User, db: Session = Depends(get_db)):
   """create user endpoint"""
   hasher = hashing.Hash()

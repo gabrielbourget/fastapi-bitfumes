@@ -25,3 +25,11 @@ class UserResponse(User):
   class Config:
     """config schema for use with sqlalchemy"""
     from_attributes = True
+
+class ReadUser(BaseModel):
+  name: str
+  email: str
+
+  class Config:
+    """config schema for use with sqlalchemy"""
+    from_attributes = True
