@@ -7,16 +7,14 @@ from sqlalchemy.orm import Session
 
 from .. import database, models, schemas
 
-router = APIRouter()
+router = APIRouter(
+  tags = ["blogs"],
+  prefix = "/blogs"
+)
 
 db = Depends(database.get_db)
 
-@router.get(
-  "/blogs/{blog_id}",
-  status_code = 200,
-  response_model = schemas.ReadBlog,
-  tags=["blogs"]
-)
+@router.get("/{blog_id}", status_code = 200, response_model = schemas.ReadBlog)
 async def get_blog(blog_id: int, db: Session = db):
   """get blog endpoint"""
   blog_post = db.query(models.Blog).filter(models.Blog.id == blog_id).first()
@@ -31,13 +29,13 @@ async def get_blog(blog_id: int, db: Session = db):
 
   return blog_post
 
-@router.get("/blogs", response_model = List[schemas.ReadBlog], tags=["blogs"])
+@router.get("", response_model = List[schemas.ReadBlog])
 async def get_blogs(db: Session = db):
   """get blog endpoint"""
   blog_posts = db.query(models.Blog).all()
   return blog_posts
 
-@router.post("/blogs", status_code = status.HTTP_201_CREATED, tags=["blogs"])
+@router.post("", status_code = status.HTTP_201_CREATED)
 async def create_blog(blog: schemas.Blog, db: Session = db):
   """create blog endpoint"""
 
@@ -56,7 +54,7 @@ async def create_blog(blog: schemas.Blog, db: Session = db):
     db.rollback()
     raise HTTPException(status_code=500, detail="Database error") from e
 
-@router.put("/blogs/{blog_id}", status_code = status.HTTP_202_ACCEPTED, tags=["blogs"])
+@router.put("/{blog_id}", status_code = status.HTTP_202_ACCEPTED)
 async def update_blog(blog_id: int, blog: schemas.Blog, db: Session = db):
   """update blog endpoint"""
   try:
@@ -79,7 +77,7 @@ async def update_blog(blog_id: int, blog: schemas.Blog, db: Session = db):
     db.rollback()
     raise HTTPException(status_code = 500, detail="Database error") from e
 
-@router.delete("/blogs/{blog_id}", status_code = status.HTTP_204_NO_CONTENT, tags=["blogs"])
+@router.delete("/{blog_id}", status_code = status.HTTP_204_NO_CONTENT)
 async def delete_blog(blog_id: int, db: Session = db):
   """delete blog endpoint"""
 

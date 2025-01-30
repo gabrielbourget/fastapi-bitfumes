@@ -7,11 +7,14 @@ from sqlalchemy.orm import Session
 
 from .. import database, hashing, models, schemas
 
-router = APIRouter()
+router = APIRouter(
+  tags = ["users"],
+  prefix = "/users"
+)
 
 db = Depends(database.get_db)
 
-@router.get("/users/{user_id}", response_model = schemas.ReadUser, tags=["users"])
+@router.get("/{user_id}", response_model = schemas.ReadUser)
 async def get_user(user_id: int, db: Session = db):
   """get user endpoint"""
   user = db.query(models.User).filter(models.User.id == user_id).first()
@@ -24,12 +27,7 @@ async def get_user(user_id: int, db: Session = db):
 
   return user
 
-@router.post(
-  "/users",
-  status_code = status.HTTP_201_CREATED,
-  response_model = schemas.ReadUser,
-  tags=["users"]
-)
+@router.post("/", status_code = status.HTTP_201_CREATED,response_model = schemas.ReadUser)
 async def create_user(user: schemas.User, db: Session = db):
   """create user endpoint"""
   hasher = hashing.Hash()
