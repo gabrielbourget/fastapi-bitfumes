@@ -18,7 +18,7 @@ def get_db():
     db.close()
 
 # @app.get("/blogs")
-@app.get("/blogs", response_model = List[schemas.BlogResponse], tags=["blogs"])
+@app.get("/blogs", response_model = List[schemas.ReadBlog], tags=["blogs"])
 async def get_blogs(db: Session = Depends(get_db)):
   """get blog endpoint"""
   try:
@@ -33,7 +33,7 @@ async def get_blogs(db: Session = Depends(get_db)):
 @app.get(
   "/blogs/{blog_id}",
   status_code = 200,
-  response_model = schemas.BlogResponse,
+  response_model = schemas.ReadBlog,
   tags=["blogs"]
 )
 async def get_blog(blog_id: int, db: Session = Depends(get_db)):
@@ -61,7 +61,7 @@ async def create_blog(blog: schemas.Blog, db: Session = Depends(get_db)):
 
   try:
     # new_blog_post = models.Blog(**blog.dict())
-    new_blog_post = models.Blog(title = blog.title, body = blog.body)
+    new_blog_post = models.Blog(title = blog.title, body = blog.body, user_id = 1)
     db.add(new_blog_post)
     db.commit()
     db.refresh(new_blog_post)
@@ -131,20 +131,15 @@ async def delete_blog(blog_id: int, db: Session = Depends(get_db)):
 @app.get("/users/{user_id}", response_model = schemas.ReadUser, tags=["users"])
 async def get_user(user_id: int, db: Session = Depends(get_db)):
   """get user endpoint"""
-  try:
-    user = db.query(models.User).filter(models.User.id == user_id).first()
+  user = db.query(models.User).filter(models.User.id == user_id).first()
 
-    if not user:
-      raise HTTPException(
-        status_code = status.HTTP_404_NOT_FOUND,
-        detail = f"User with id {user_id} not found"
-      )
+  if not user:
+    raise HTTPException(
+      status_code = status.HTTP_404_NOT_FOUND,
+      detail = f"User with id {user_id} not found"
+    )
 
-    return user
-  except DatabaseError as e:
-    raise HTTPException(status_code = 500, detail = "Database error") from e
-  except Exception as e:
-    raise HTTPException(status_code = 500, detail = "Internal server error") from e
+  return user
 
 @app.post(
   "/users",
@@ -167,7 +162,7 @@ async def create_user(user: schemas.User, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    return { "data": new_user }
+    return schemas.ReadUser(name = new_user.name, email = new_user.email)
   except IntegrityError as e:
     db.rollback()
     raise HTTPException(status_code = 400, detail = "User already exists") from e

@@ -1,34 +1,46 @@
 """blog schema"""
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel
 
-class Blog(BaseModel):
-  """blog schema"""
-  title: str
-  body: str
-  published: Optional[bool]
-
-class BlogResponse(Blog):
-  """blog response schema"""
-  class Config:
-    """config schema for use with sqlalchemy"""
-    from_attributes = True
-
-class User(BaseModel):
-  """user schema"""
+class BaseUser(BaseModel):
+  """base user schema"""
   name: str
   email: str
   password: str
 
-class UserResponse(User):
-  """user response schema"""
+class User(BaseUser):
+  """user schema"""
+  class Config:
+    """config schema for use with sqlalchemy"""
+    from_attributes = True
+
+class BaseBlog(BaseModel):
+  """base blog schema"""
+  title: str
+  body: str
+  published: Optional[bool]
+
+class Blog(BaseBlog):
+  """blog schema"""
   class Config:
     """config schema for use with sqlalchemy"""
     from_attributes = True
 
 class ReadUser(BaseModel):
+  """read user schema"""
   name: str
   email: str
+  blogs: List[Blog] = []
+
+  class Config:
+    """config schema for use with sqlalchemy"""
+    from_attributes = True
+
+class ReadBlog(BaseModel):
+  """blog response schema"""
+  title: str
+  body: str
+  creator: ReadUser
 
   class Config:
     """config schema for use with sqlalchemy"""
