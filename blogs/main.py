@@ -123,3 +123,24 @@ async def delete_blog(blog_id: int, db: Session = Depends(get_db)):
   except Exception as e:
     db.rollback()
     raise HTTPException(status_code = 500, detail="Internal server error") from e
+
+@app.post("/users", status_code = status.HTTP_201_CREATED)
+async def create_user(user: schemas.User, db: Session = Depends(get_db)):
+  """create user endpoint"""
+  try:
+    new_user = models.User(name = user.name, email = user.email, password = user.password)
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return { "data": new_user }
+  except IntegrityError as e:
+    db.rollback()
+    raise HTTPException(status_code = 400, detail = "User already exists") from e
+  except DatabaseError as e:
+    db.rollback()
+    raise HTTPException(status_code = 500, detail = "Database error") from e
+  except Exception as e:
+    db.rollback()
+    raise HTTPException(status_code = 500, detail = "Internal server error") from e

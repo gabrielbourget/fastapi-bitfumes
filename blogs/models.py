@@ -11,3 +11,13 @@ class Blog(Base):
   title = Column(String)
   body = Column(String)
   published = Column(Boolean, default = False)
+
+class User(Base):
+  """user model"""
+
+  __tablename__ = "users"
+
+  id = Column(Integer, primary_key = True, index = True)
+  name = Column(String)
+  email = Column(String)
+  password = Column(String)

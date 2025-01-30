@@ -11,4 +11,17 @@ class Blog(BaseModel):
 class BlogResponse(Blog):
   """blog response schema"""
   class Config:
+    """config schema for use with sqlalchemy"""
+    orm_mode = True
+
+class User(BaseModel):
+  """user schema"""
+  name: str
+  email: str  
+  password: str
+
+class UserResponse(User):
+  """user response schema"""
+  class Config:
+    """config schema for use with sqlalchemy"""
     orm_mode = True
