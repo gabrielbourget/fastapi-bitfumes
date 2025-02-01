@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from .. import database, hashing, models, schemas
-from ..token import ACCESS_TOKEN_EXPIRY__MINUTES, create_access_token
+from ..token import create_access_token
 
 router = APIRouter(tags = ["auth"])
 
@@ -24,10 +24,6 @@ def login_route(user: schemas.LoginUser, db: Session = db):
   if not hashing.verify(user.password, existing_user.password):
     raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED, detail = "Invalid credentials")
 
-  access_token_expiry = timedelta(minutes = ACCESS_TOKEN_EXPIRY__MINUTES)
-  access_token = create_access_token(
-    data = { "sub", user.username },
-    expires_delta = access_token_expiry
-  )
+  access_token = create_access_token(data = { "sub": user.username })
 
   return { "access_token": access_token, "token_type": "bearer" }
