@@ -16,6 +16,10 @@ class User(BaseUser):
     """config schema for use with sqlalchemy"""
     from_attributes = True
 
+class LoginUser(BaseModel):
+  username: str
+  password: str
+
 class BaseBlog(BaseModel):
   """base blog schema"""
   title: str
