@@ -1,18 +1,21 @@
 """auth router file"""
-from datetime import timedelta
 
+# from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from .. import database, hashing, models, schemas
-from ..token import create_access_token
+from .. import database, hashing, models
+from ..schemas import LoginUser
+from ..utils.token import create_access_token
 
 router = APIRouter(tags = ["auth"])
 
 db = Depends(database.get_db)
+empty_depends = Depends()
 
+# def login_route(user: OAuth2PasswordRequestForm = empty_depends, db: Session = db):
 @router.post("/login")
-def login_route(user: schemas.LoginUser, db: Session = db):
+def login_route(user: LoginUser, db: Session = db):
   existing_user = db.query(models.User).filter(models.User.email == user.username).first()
 
   if not existing_user:
