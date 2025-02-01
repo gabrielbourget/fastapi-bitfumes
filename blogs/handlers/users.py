@@ -20,13 +20,12 @@ def get_user(user_id: int, db: Session = db):
 
 async def create_user(user: schemas.User, db: Session = db):
   """create user endpoint"""
-  hasher = hashing.Hash()
 
   try:
     new_user = models.User(
       name = user.name,
       email = user.email,
-      password = hasher.bcrypt(password = user.password)
+      password = hashing.bcrypt(password = user.password)
     )
 
     db.add(new_user)

@@ -1,8 +1,11 @@
 """auth router file"""
+from datetime import timedelta
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from .. import database, models, schemas
+from .. import database, hashing, models, schemas
+from ..token import ACCESS_TOKEN_EXPIRY__MINUTES, create_access_token
 
 router = APIRouter(tags = ["auth"])
 
@@ -18,4 +21,13 @@ def login_route(user: schemas.LoginUser, db: Session = db):
       detail = f"User with email {user.email} not found"
     )
 
-  return existing_user
+  if not hashing.verify(user.password, existing_user.password):
+    raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED, detail = "Invalid credentials")
+
+  access_token_expiry = timedelta(minutes = ACCESS_TOKEN_EXPIRY__MINUTES)
+  access_token = create_access_token(
+    data = { "sub", user.username },
+    expires_delta = access_token_expiry
+  )
+
+  return { "access_token": access_token, "token_type": "bearer" }
